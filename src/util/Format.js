@@ -1,4 +1,5 @@
-class Format {
+
+export class Format {
 
     static getCamelCase(elementId) {
 
