@@ -8,7 +8,6 @@ export class Format {
         div.innerHTML = `<div data-${elementId}="id"></div>`;
 
         return Object.keys(div.firstChild.dataset)[0]
-
     }
 
     static toTime(duration) {

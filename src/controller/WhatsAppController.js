@@ -1,5 +1,8 @@
-import {Format} from '../util/Format.js';
-import {CameraController} from './CameraController.js';
+import { Format } from '../util/Format.js';
+import { CameraController } from './CameraController.js';
+import { DocumentPreviewController } from './DocumentPreviewController';
+import { MicrophoneController } from './MicrophoneController';
+
 
 export class WhatsAppController {
 
@@ -12,33 +15,9 @@ export class WhatsAppController {
 
     initEvents() {
 
-        this.el.myPhoto.on('click', e => {
-
-            this.closeAllLeftPanel()
-            this.el.panelEditProfile.show();
-
-            setTimeout(() => {
-                this.el.panelEditProfile.addClass('open');
-            }, 50)
-
-        });
-
-        this.el.btnNewContact.on('click', e => {
-            this.closeAllLeftPanel()
-            this.el.panelAddContact.show();
-
-            setTimeout(() => {
-                this.el.panelAddContact.addClass('open');
-            }, 50)
-
-        });
 
         this.el.btnClosePanelEditProfile.on('click', e => {
             this.el.panelEditProfile.removeClass('open');
-        });
-
-        this.el.btnClosePanelAddContact.on('click', e => {
-            this.el.panelAddContact.removeClass('open');
         });
 
         this.el.photoContainerEditProfile.on('click', e => {
@@ -61,6 +40,24 @@ export class WhatsAppController {
             console.log(this.el.inputNamePanelEditProfile.innerHTML)
         });
 
+
+
+
+
+        this.el.btnNewContact.on('click', e => {
+            this.closeAllLeftPanel()
+            this.el.panelAddContact.show();
+
+            setTimeout(() => {
+                this.el.panelAddContact.addClass('open');
+            }, 50)
+
+        });
+
+        this.el.btnClosePanelAddContact.on('click', e => {
+            this.el.panelAddContact.removeClass('open');
+        });
+
         this.el.formPanelAddContact.on('submit', e => {
 
             e.preventDefault();
@@ -79,6 +76,18 @@ export class WhatsAppController {
                 this.el.home.hide();
             });
         });
+
+        this.el.btnAttachContact.on('click', e => {
+
+            this.el.modalContacts.show();
+        });
+
+        this.el.btnCloseModalContacts.on('click', e => {
+            this.el.modalContacts.hide();
+        });
+
+
+
 
         this.el.btnAttach.on('click', e => {
 
@@ -109,9 +118,9 @@ export class WhatsAppController {
         });
 
         this.el.btnTakePicture.on('click', e => {
-            
+
             let dataUrl = this._camera.takePicture();
-            
+
             this.el.pictureCamera.src = dataUrl;
             this.el.pictureCamera.show();
             this.el.videoCamera.hide();
@@ -120,7 +129,6 @@ export class WhatsAppController {
             this.el.containerSendPicture.show();
 
         });
-
 
         this.el.btnReshootPanelCamera.on('click', e => {
 
@@ -136,15 +144,6 @@ export class WhatsAppController {
             console.log(this.el.pictureCamera)
         })
 
-        this.el.btnAttachContact.on('click', e => {
-
-            this.el.modalContacts.show();
-        });
-
-        this.el.btnCloseModalContacts.on('click', e => {
-            this.el.modalContacts.hide();
-        });
-
 
 
         this.el.btnAttachDocument.on('click', e => {
@@ -154,6 +153,70 @@ export class WhatsAppController {
             this.el.panelDocumentPreview.css({
                 'height': 'calc(100% - 120px)'
             });
+
+            this.el.inputDocument.click();
+
+        });
+
+        this.el.inputDocument.on('change', e => {
+
+            if (this.el.inputDocument.files.length) {
+
+                this.el.panelDocumentPreview.css({
+                    'height': '1%'
+                });
+
+                let file = this.el.inputDocument.files[0];
+
+                this._documentPreviewController = new DocumentPreviewController(file);
+
+                this._documentPreviewController.getPreviewData().then(result => {
+
+                    this.el.imgPanelDocumentPreview.src = result.src;
+                    this.el.infoPanelDocumentPreview.innerHTML = result.info;
+
+                    this.el.imagePanelDocumentPreview.show();
+                    this.el.filePanelDocumentPreview.hide();
+
+                    this.el.panelDocumentPreview.css({
+                        'height': 'calc(100% - 120px)'
+                    });
+
+                }).catch(err => {
+
+                    this.el.panelDocumentPreview.css({
+                        'height': 'calc(100% - 120px)'
+                    });
+
+
+                    switch (file.type) {
+
+                        case 'application/vnd.ms-excel':
+                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-xls'
+                            break;
+
+                        case 'application/vnd.ms-powerpoint':
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-ppt'
+                            break;
+
+                        case 'application/msword':
+                        case 'application/vnd.oasis.opendocument.text':
+                        case 'application/vnd.ms-word.document.macroEnabled.12':
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-doc'
+                            break;
+
+                        default:
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-generic';
+                            break;
+                    }
+
+                    this.el.filenamePanelDocumentPreview.innerHTML = file.name;
+                    this.el.imagePanelDocumentPreview.hide();
+                    this.el.filePanelDocumentPreview.show();
+
+                });
+            }
 
         });
 
@@ -166,6 +229,7 @@ export class WhatsAppController {
             this.closeAllMainPanel();
             this.el.panelMessagesContainer.show();
         });
+
 
 
 
@@ -184,25 +248,49 @@ export class WhatsAppController {
             });
         });
 
-        
+        this.el.myPhoto.on('click', e => {
+
+            this.closeAllLeftPanel()
+            this.el.panelEditProfile.show();
+
+            setTimeout(() => {
+                this.el.panelEditProfile.addClass('open');
+            }, 50)
+
+        });
+
+
 
 
         this.el.btnSendMicrophone.on('click', e => {
             this.el.recordMicrophone.show();
             this.el.btnSendMicrophone.hide();
             this.startRecordMicrophoneTime();
+
+            this._microphoneController = new MicrophoneController();
+
+            this._microphoneController.on('ready', musica => {
+               
+                this._microphoneController.startRecorder();
+            });
+
         });
 
         this.el.btnCancelMicrophone.on('click', e => {
 
+            this._microphoneController.stopRecorder();
             this.closeRecorMicrophone();
 
         });
 
         this.el.btnFinishMicrophone.on('click', e => {
 
+            this._microphoneController.stopRecorder();
+
             this.closeRecorMicrophone();
         });
+
+
 
 
         this.el.inputText.on('keypress', e => {
@@ -324,7 +412,6 @@ export class WhatsAppController {
     }
 
     loadElemtens() {
-
 
         this.el = {};
 
