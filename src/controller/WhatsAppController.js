@@ -2,15 +2,30 @@ import { Format } from '../util/Format.js';
 import { CameraController } from './CameraController.js';
 import { DocumentPreviewController } from './DocumentPreviewController';
 import { MicrophoneController } from './MicrophoneController';
-
+import { Firebase } from '../util/Firebase';
 
 export class WhatsAppController {
 
     constructor() {
 
+        this.initAuth();
         this.elementsPrototype();
         this.loadElemtens();
         this.initEvents();
+
+    }
+
+    initAuth() {
+        this._firebase = new Firebase();
+
+        this._firebase.initAuth()
+            .then(response => {
+                this.el.appContent.css({
+                    display: 'flex'
+                })
+
+            })
+            .catch(err => { console.error(err) })
     }
 
     initEvents() {
@@ -230,9 +245,6 @@ export class WhatsAppController {
             this.el.panelMessagesContainer.show();
         });
 
-
-
-
         this.el.btnAttachPhoto.on('click', e => {
 
             this.el.inputPhoto.click();
@@ -259,20 +271,21 @@ export class WhatsAppController {
 
         });
 
-
-
-
         this.el.btnSendMicrophone.on('click', e => {
+
             this.el.recordMicrophone.show();
             this.el.btnSendMicrophone.hide();
-            this.startRecordMicrophoneTime();
 
             this._microphoneController = new MicrophoneController();
 
             this._microphoneController.on('ready', musica => {
-               
+
                 this._microphoneController.startRecorder();
             });
+
+            this._microphoneController.on('recordTimer', timer => {
+                this.el.recordMicrophoneTimer.innerHTML = Format.toTime(timer)
+            })
 
         });
 
@@ -370,25 +383,14 @@ export class WhatsAppController {
             });
         });
 
-
-
     }
 
-    startRecordMicrophoneTime() {
-        let start = Date.now();
-
-        this._recordMicrophoneInterval = setInterval(() => {
-
-            this.el.recordMicrophoneTimer.innerHTML = Format.toTime(Date.now() - start);
-        }, 100)
-    }
 
     closeRecorMicrophone() {
 
         this.el.recordMicrophone.hide();
         this.el.btnSendMicrophone.show();
 
-        clearInterval(this._recordMicrophoneInterval);
     }
 
     closeAllMainPanel() {
