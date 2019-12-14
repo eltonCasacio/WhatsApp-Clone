@@ -61,23 +61,28 @@ export class MicrophoneController extends ClassEvent {
 
                 let filename = `rec${Date.now()}.webm`;
 
-                let file = new File([blob], filename, {
-                    type: this._mimeType,
-                    lastModified: Date.now()
-                });
+                let audioContext = new AudioContext();
 
                 let reader = new FileReader();
 
                 reader.onload = e => {
-                    console.log('reader.onload')
 
-                    let audio = new Audio(reader.result);
+                    audioContext.decodeAudioData(reader.result).then(decode => {
 
-                    audio.play();
+                        let file = new File([blob], filename, {
+                            type: this._mimeType,
+                            lastModified: Date.now()
+                        });
+
+                        this.trigger('recorded', file, decode);
+
+                    });
+
 
                 }
 
-                reader.readAsDataURL(file);
+                reader.readAsArrayBuffer(blob);
+
             });
 
             this._mediaRecorder.start();
@@ -93,16 +98,16 @@ export class MicrophoneController extends ClassEvent {
         }
     }
 
-    startTimer(){
+    startTimer() {
         let start = Date.now();
 
         this._recordMicrophoneInterval = setInterval(() => {
 
-            this.trigger('recordTimer' , Date.now() - start)
+            this.trigger('recordTimer', Date.now() - start)
         }, 100)
     }
 
-    stopTimer(){
+    stopTimer() {
         clearInterval(this._recordMicrophoneInterval);
     }
 }

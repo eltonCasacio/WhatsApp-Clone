@@ -24,4 +24,17 @@ export class Format {
         }
     }
 
+    static dateToTime(date, locale = 'pt-BR'){
+
+        return date.toLocaleTimeString(locale, {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    static timeStampToTime(timeStamp){
+
+        return (timeStamp && typeof timeStamp.toDate === 'function') ?
+        Format.dateToTime(timeStamp.toDate()) : '';
+    }
+
 }

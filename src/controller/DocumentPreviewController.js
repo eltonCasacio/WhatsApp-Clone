@@ -44,13 +44,12 @@ export class DocumentPreviewController {
 
                             pdf.getPage(1).then(page => {
 
-                                let viewPort = page.getViewport(1);
-
+                                let viewport = page.getViewport({ scale: 1, })
                                 let canvas = document.createElement('canvas');
                                 let canvasContext = canvas.getContext('2d');
 
-                                canvas.width = viewPort.width;
-                                canvas.height = viewPort.height;
+                                canvas.width = viewport.width;
+                                canvas.height = viewport.height;
 
                                 page.render({
 
@@ -70,7 +69,8 @@ export class DocumentPreviewController {
 
                             }).catch(err => reject(err));
 
-                        }).catch(err => reject(err));
+                        }).catch(err => reject(err))
+
                     }
 
                     reader.readAsArrayBuffer(this._file);
